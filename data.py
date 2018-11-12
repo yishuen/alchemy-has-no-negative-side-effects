@@ -1,5 +1,5 @@
 import requests
-from models import Strain, Flavor, StrainFlavor #, Effect, StrainEffects
+from models import Strain, Flavor, StrainFlavor, Effect, StrainEffects
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -30,58 +30,60 @@ def instantiate_flavors():
 
 flavor_instances = instantiate_flavors()
 
+def pos_effects():
+    pos_effects = []
+    for strain in data:
+        pos_effects += strain[1]['effects']['positive']
+    return list(set(pos_effects))
+
+def neg_effects():
+    neg_effects = []
+    for strain in data:
+        neg_effects += strain[1]['effects']['negative']
+    return list(set(neg_effects))
+
+def med_effects():
+    med_effects = []
+    for strain in data:
+        med_effects += strain[1]['effects']['medical']
+    return list(set(med_effects))
+
+def instantiate_effects():
+    effect_instances = []
+    for effect in pos_effects():
+        eff = Effect(name=effect, type='Positive', strains=[])
+        effect_instances.append(eff)
+    for effect in neg_effects():
+        eff = Effect(name=effect, type='Negative', strains=[])
+        effect_instances.append(eff)
+    for effect in med_effects():
+        eff = Effect(name=effect, type='Medical', strains=[])
+        effect_instances.append(eff)
+    return effect_instances
+
+effect_instances = instantiate_effects()
+
 def instantiate_strains():
     strain_instances = []
     for strain in data:
         s = Strain(name=strain[0], \
             race=strain[1]['race'], \
             flavors=list(filter(lambda f: f.name in strain[1]['flavors'], \
-                flavor_instances)))
+                flavor_instances)), \
+            effects = list(filter(lambda e: e.name in strain[1]['effects']['positive'] or \
+                                            e.name in strain[1]['effects']['negative'] or \
+                                            e.name in strain[1]['effects']['medical'], effect_instances)))
         strain_instances.append(s)
     return strain_instances
 
-# def add_flavors():
-#     for strain in data:
-#         flav_objs = instantiate_flavors()
-#         flavors = list(filter(lambda f: f.name in strain[1]['flavors'], flav_objs))
-#         pick = list(filter(lambda n: n.name == strain[0], instantiate_strains()))[0]
-#         pick.flavors.append(flavors)
-#
-# add_flavors()
+strain_instances = instantiate_strains()
 
-
-
-x = instantiate_strains()
-
-session.add_all(x)
+session.add_all(strain_instances)
 session.add_all(flavor_instances)
 session.commit()
-#
-# def print_strains():
-#     for i in session.query(Strain).all():
-#         print(i.name)
-#
-# def print_flavors():
-#     for i in session.query(Flavor).all():
-#         print(i.name)
-#
-# def pos_effects():
-#     pos_effects = []
-#     for name in strain_names:
-#         pos_effects += data[name]['effects']['positive']
-#     return list(set(pos_effects))
-#
-# def neg_effects():
-#     neg_effects = []
-#     for name in strain_names:
-#         neg_effects += data[name]['effects']['negative']
-#     return list(set(neg_effects))
-#
-# def med_effects():
-#     med_effects = []
-#     for name in strain_names:
-#         med_effects += data[name]['effects']['medical']
-#     return list(set(med_effects))
+
+
+
 
 
 # "Afpak":    {"id":1 ,

@@ -1,6 +1,6 @@
 from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker, relationship, backref
+from sqlalchemy.orm import sessionmaker, relationship
 Base = declarative_base()
 
 class Strain(Base):
@@ -9,8 +9,7 @@ class Strain(Base):
     name = Column(Text)
     race = Column(Text)
     flavors = relationship('Flavor', secondary='strainflavors', back_populates='strains')
-    # effect_ids = Column(Integer, ForeignKey('effects.id'))
-    # effects = relationship('Effect', secondary = 'straineffects', back_populates = 'strain')
+    effects = relationship('Effect', secondary = 'straineffects', back_populates = 'strains')
 
 class Flavor(Base):
     __tablename__ = 'flavors'
@@ -23,22 +22,17 @@ class StrainFlavor(Base):
     strain_id = Column(Integer, ForeignKey('strains.id'), primary_key=True)
     flavor_id = Column(Integer, ForeignKey('flavors.id'), primary_key=True)
 
-# class Effect(Base):
-#     __tablename__ = 'effects'
-#     id = Column(Integer, primary_key=True)
-#     name = Column(Text)
-#     type = Column(Text)
-#     strain_ids = Column(Integer, ForeignKey('strains.id'))
-#     strains = relationship('Strain', secondary = 'straineffects', back_populates = 'effects')
+class Effect(Base):
+    __tablename__ = 'effects'
+    id = Column(Integer, primary_key=True)
+    name = Column(Text)
+    type = Column(Text)
+    strains = relationship('Strain', secondary = 'straineffects', back_populates = 'effects')
 
-
-
-
-# class StrainEffects(Base):
-#     __tablename__ = 'straineffects'
-#     id = Column(Integer, primary_key=True)
-#     strain_id = Column(Integer, ForeignKey('strains.id'))
-#     effect_id = Column(Integer, ForeignKey('effects.id'))
+class StrainEffects(Base):
+    __tablename__ = 'straineffects'
+    strain_id = Column(Integer, ForeignKey('strains.id'), primary_key=True)
+    effect_id = Column(Integer, ForeignKey('effects.id'), primary_key=True)
 
 
 engine = create_engine('sqlite:///weed.db')
