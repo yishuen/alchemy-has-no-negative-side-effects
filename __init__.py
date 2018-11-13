@@ -11,8 +11,7 @@ db = SQLAlchemy(server)
 
 app = dash.Dash(__name__, server=server, url_base_pathname='/dashboard/')
 
-from dash_package.scrape_craigslist import ListingBuilder, CraigsListScraper, ListingParser
-
+from dash_package.queries import *
 from dash_package.models import *
 from dash_package.routes import *
 from dash_package.dashboard import *

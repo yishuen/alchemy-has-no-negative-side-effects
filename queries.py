@@ -1,5 +1,6 @@
-from models import *
+from models import Strain, Flavor, Effect, Country, StrainFlavor, StrainEffects, StrainCountry
 from sqlalchemy import create_engine, func
+from sqlalchemy.orm import sessionmaker, relationship
 from collections import Counter
 engine = create_engine('sqlite:///weed.db')
 Session = sessionmaker(bind=engine)
@@ -19,7 +20,7 @@ def strain_names_by_race(race):
 
 def count_by_race():
     race_counts = list(map(lambda r: (r, len(strain_names_by_race(r))), races()))
-    return {'x': list(map(lambda c: c[0], race_counts)), 'y': list(map(lambda c: c[0], race_counts))}
+    return {'x': list(map(lambda c: c[0], race_counts)), 'y': list(map(lambda c: c[1], race_counts))}
 
 def flavors():
     objs = session.query(Strain).all()
