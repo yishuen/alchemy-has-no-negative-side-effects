@@ -1,5 +1,6 @@
 import requests
-from models import Strain, Flavor, StrainFlavor, Effect, StrainEffects
+import json
+from models import Strain, Flavor, StrainFlavor, Effect, StrainEffects, Country, StrainCountry
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -63,23 +64,60 @@ def instantiate_effects():
 
 effect_instances = instantiate_effects()
 
+json_data=open('location-data.json').read()
+lineage_data = json.loads(json_data)
+lineages = list(lineage_data.items())
+
+strains_with_lineages = list(filter(lambda s: s[0] in strain_names, lineages))
+
+def countries():
+    countries = []
+    for strain in strains_with_lineages:
+        countries += strain[1]
+    return list(set(countries))
+
+def instantiate_countries():
+    country_instances = []
+    for country in countries():
+        ctry = Country(name=country, strains=[])
+        country_instances.append(ctry)
+    return country_instances
+
+country_instances = instantiate_countries()
+dict_with_lineages = dict(filter(lambda s: s[0] in strain_names, lineages))
+names_with_lineages = list(dict_with_lineages)
+
 def instantiate_strains():
     strain_instances = []
     for strain in data:
-        s = Strain(name=strain[0], \
-            race=strain[1]['race'], \
-            flavors=list(filter(lambda f: f.name in strain[1]['flavors'], \
-                flavor_instances)), \
-            effects = list(filter(lambda e: e.name in strain[1]['effects']['positive'] or \
-                                            e.name in strain[1]['effects']['negative'] or \
-                                            e.name in strain[1]['effects']['medical'], effect_instances)))
+        if strain[0] in names_with_lineages:
+            s = Strain(name=strain[0], \
+                race=strain[1]['race'], \
+                flavors=list(filter(lambda f: f.name in strain[1]['flavors'], \
+                    flavor_instances)), \
+                effects=list(filter(lambda e: e.name in strain[1]['effects']['positive'] or \
+                                                e.name in strain[1]['effects']['negative'] or \
+                                                e.name in strain[1]['effects']['medical'], effect_instances)),
+                countries=list(filter(lambda c: c.name in dict_with_lineages[strain[0]], country_instances)))
+        else:
+            s = Strain(name=strain[0], \
+                race=strain[1]['race'], \
+                flavors=list(filter(lambda f: f.name in strain[1]['flavors'], \
+                    flavor_instances)), \
+                effects=list(filter(lambda e: e.name in strain[1]['effects']['positive'] or \
+                                                e.name in strain[1]['effects']['negative'] or \
+                                                e.name in strain[1]['effects']['medical'], effect_instances)),
+                countries=[])
         strain_instances.append(s)
     return strain_instances
 
 strain_instances = instantiate_strains()
 
-session.add_all(strain_instances)
+
 session.add_all(flavor_instances)
+session.add_all(effect_instances)
+session.add_all(country_instances)
+session.add_all(strain_instances)
 session.commit()
 
 
