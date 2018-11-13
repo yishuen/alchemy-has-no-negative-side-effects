@@ -1,5 +1,4 @@
 from models import *
-from data import *
 from sqlalchemy import create_engine, func
 engine = create_engine('sqlite:///weed.db')
 Session = sessionmaker(bind=engine)
