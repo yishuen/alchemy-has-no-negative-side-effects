@@ -72,6 +72,26 @@ def race_count_by_country(country):
     race_counts = list(Counter(list(map(lambda s: s.race, strains))).items())
     return {'x': list(map(lambda f: f[0], race_counts)), 'y': list(map(lambda f: f[1], race_counts))}
 
+def country_race_composition():
+    country_list = []
+    sativas = []
+    indicas = []
+    hybrids = []
+    for country in countries():
+        country_list.append(country)
+        race = race_count_by_country(country)['x']
+        count = race_count_by_country(country)['y']
+        race_dict = dict(zip(race, count))
+        if 'sativa' in race_dict.keys():
+            sativas.append(race_dict['sativa'])
+        if 'indica' in race_dict.keys():
+            indicas.append(race_dict['indica'])
+        if 'hybrid' in race_dict.keys():
+            hybrids.append(race_dict['hybrid'])
+    return {'countries': country_list, 'sativas': sativas, 'indicas': indicas, 'hybrids': hybrids}
+
+
+
 def effect_count_by_country(country):
     strains = strains_by_country(country)
     effects = []
