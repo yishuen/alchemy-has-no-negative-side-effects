@@ -2,6 +2,9 @@ from sqlalchemy import *
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
 Base = declarative_base()
+from console import db
+
+#change to sqlalchemy code
 
 class Strain(Base):
     __tablename__ = 'strains'

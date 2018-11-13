@@ -1,6 +1,6 @@
 import requests
 import json
-from models import Strain, Flavor, StrainFlavor, Effect, StrainEffects, Country, StrainCountry
+from models import *
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -48,6 +48,9 @@ def med_effects():
     for strain in data:
         med_effects += strain[1]['effects']['medical']
     return list(set(med_effects))
+
+def effects():
+    return pos_effects() + neg_effects() + med_effects()
 
 def instantiate_effects():
     effect_instances = []
@@ -119,14 +122,3 @@ session.add_all(effect_instances)
 session.add_all(country_instances)
 session.add_all(strain_instances)
 session.commit()
-
-
-
-
-
-# "Afpak":    {"id":1 ,
-#             "race":"hybrid",
-#             "flavors":["Earthy","Chemical","Pine"],
-#             "effects":  {"positive":["Relaxed","Hungry","Happy","Sleepy"],
-#                         "negative":["Dizzy"],
-#                         "medical":["Depression","Insomnia","Pain","Stress","Lack of Appetite"]}}
