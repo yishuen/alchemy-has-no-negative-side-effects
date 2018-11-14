@@ -21,4 +21,4 @@ Using Dash, Plotly, Flask, SQLAlchemy, etc., we put together some really informa
 
 We also looked at the top 25 strains of marijuana in 2018 to see what people like in their weed!
 
-##### FYI: the strain named **Alchemy**, aptly has zero negative side effects.
+Fun fact: the strain named **Alchemy**, aptly has zero negative side effects.
