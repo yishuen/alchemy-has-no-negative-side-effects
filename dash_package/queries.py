@@ -1,20 +1,21 @@
-from models import Strain, Flavor, Effect, Country, StrainFlavor, StrainEffects, StrainCountry
-from sqlalchemy import create_engine, func
-from sqlalchemy.orm import sessionmaker, relationship
+
+from dash_package.models import Strain, Flavor, Effect, Country, StrainFlavor, StrainEffects, StrainCountry
+# from sqlalchemy import create_engine, func
+# from sqlalchemy.orm import sessionmaker, relationship
 from collections import Counter
-engine = create_engine('sqlite:///weed.db')
-Session = sessionmaker(bind=engine)
-session = Session()
+# engine = create_engine('sqlite:///weed.db')
+# Session = sessionmaker(bind=engine)
+# session = Session()
 
 # CHANGE QUERIES from session.query(Listing).all() to Listing.query.all()/filter_by()
 
 def races():
-    objs = session.query(Strain).all()
+    objs = Strain.query.all()
     races = list(map(lambda o: o.race, objs))
     return list(set(races))
 
 def strain_names_by_race(race):
-    objs = session.query(Strain).filter(Strain.race == race).all()
+    objs = Strain.query.filter(Strain.race == race).all()
     names = list(map(lambda o: o.name, objs))
     return names
 
@@ -22,8 +23,9 @@ def count_by_race():
     race_counts = list(map(lambda r: (r, len(strain_names_by_race(r))), races()))
     return {'x': list(map(lambda c: c[0], race_counts)), 'y': list(map(lambda c: c[1], race_counts))}
 
+
 def flavors():
-    objs = session.query(Strain).all()
+    objs = Strain.query.all()
     flavors = []
     for o in objs:
         for flavor in o.flavors:
@@ -31,7 +33,7 @@ def flavors():
     return list(set(flavors))
 
 def strain_names_by_flavor(flavor):
-    objs = session.query(Flavor).filter(Flavor.name == flavor).first().strains
+    objs = Flavor.query(Flavor).filter(Flavor.name == flavor).first().strains
     names = list(map(lambda o: o.name, objs))
     return names
 
@@ -39,8 +41,9 @@ def count_by_flavor():
     flavor_counts = list(map(lambda f: (f, len(strain_names_by_flavor(f))), flavors()))
     return {'x': list(map(lambda f: f[0], flavor_counts)), 'y': list(map(lambda f: f[1], flavor_counts))}
 
+
 def effects():
-    objs = session.query(Strain).all()
+    objs = Strain.query.all()
     effects = []
     for o in objs:
         for effect in o.effects:
@@ -48,7 +51,7 @@ def effects():
     return list(set(effects))
 
 def strain_names_by_effect(effect):
-    objs = session.query(Effect).filter(Effect.name == effect).first().strains
+    objs = Effect.query.filter(Effect.name == effect).first().strains
     names = list(map(lambda o: o.name, objs))
     return names
 
@@ -56,8 +59,9 @@ def count_by_effect():
     effect_counts = list(map(lambda e: (e, len(strain_names_by_effect(e))), effects()))
     return {'x': list(map(lambda f: f[0], effect_counts)), 'y': list(map(lambda f: f[1], effect_counts))}
 
+
 def countries():
-    objs = session.query(Strain).all()
+    objs = Strain.query.all()
     countries = []
     for o in objs:
         for country in o.countries:
@@ -65,12 +69,44 @@ def countries():
     return list(set(countries))
 
 def strains_by_country(country):
-    return session.query(Country).filter(Country.name == country).first().strains
+    return Country.query.filter(Country.name == country).first().strains
 
 def race_count_by_country(country):
     strains = strains_by_country(country)
     race_counts = list(Counter(list(map(lambda s: s.race, strains))).items())
     return {'x': list(map(lambda f: f[0], race_counts)), 'y': list(map(lambda f: f[1], race_counts))}
+
+
+def effect_count_by_country(country):
+    strains = strains_by_country(country)
+    effects = []
+    for strain in strains:
+        straineffects = strain.effects
+        for effect in straineffects:
+            effects.append(effect.name)
+    effect_counts = list(dict(Counter(effects)).items())
+    return {'x': list(map(lambda f: f[0], effect_counts)), 'y': list(map(lambda f: f[1], effect_counts))}
+
+def country_count_by_effect(effect):
+    pass
+
+def flavor_count_by_country(country):
+    strains = strains_by_country(country)
+    flavors = []
+    for strain in strains:
+        strainflavors = strain.flavors
+        for flavor in strainflavors:
+            flavors.append(flavor.name)
+    flavor_counts = list(dict(Counter(flavors)).items())
+    return {'x': list(map(lambda f: f[0], flavor_counts)), 'y': list(map(lambda f: f[1], flavor_counts))}
+
+def strain_names_by_country(country):
+    objs = Country.query.filter(Country.name == country).first().strains
+    names = list(map(lambda o: o.name, objs))
+    return names
+
+def count_by_country():
+    return list(map(lambda c: (c, len(strain_names_by_country(c))), countries()))
 
 def country_race_composition():
     country_list = []
@@ -89,35 +125,27 @@ def country_race_composition():
         if 'hybrid' in race_dict.keys():
             hybrids.append(race_dict['hybrid'])
     return {'countries': country_list, 'sativas': sativas, 'indicas': indicas, 'hybrids': hybrids}
-
-
-
-def effect_count_by_country(country):
-    strains = strains_by_country(country)
-    effects = []
-    for strain in strains:
-        straineffects = strain.effects
-        for effect in straineffects:
-            effects.append(effect.name)
-    effect_counts = list(dict(Counter(effects)).items())
-    return {'x': list(map(lambda f: f[0], effect_counts)), 'y': list(map(lambda f: f[1], effect_counts))}
-
-
-def flavor_count_by_country(country):
-    strains = strains_by_country(country)
-    flavors = []
-    for strain in strains:
-        strainflavors = strain.flavors
-        for flavor in strainflavors:
-            flavors.append(flavor.name)
-    flavor_counts = list(dict(Counter(flavors)).items())
-    return {'x': list(map(lambda f: f[0], flavor_counts)), 'y': list(map(lambda f: f[1], flavor_counts))}
-
-
-def strain_names_by_country(country):
-    objs = session.query(Country).filter(Country.name == country).first().strains
-    names = list(map(lambda o: o.name, objs))
-    return names
-
-def count_by_country():
-    return list(map(lambda c: (c, len(strain_names_by_country(c))), countries()))
+# top_25_strains = ['Blue Dream', 'Sour Diesel', 'Girl Scout Cookies', 'OG Kush', 'Pineapple Express', 'White Widow', 'Grape Crush', 'White Rhino', 'Green Crack', 'Jack Herer', 'Bubba Kush', 'Gorilla Glue #4', 'Hindu Kush', 'Skywalker OG', 'Trainwreck', 'Purple Kush', 'White OG', 'Skunk #1', 'Purple Goo', 'Afghan Kush', 'Bubble Gum', 'Purple Urkle', 'Grape Ape', 'Purple Haze', 'Lemon Kush']
+# def top_25_flavors():
+#     flavor_counts = []
+#     for bud in top_25_strains:
+#         for strain in session.query(Strain).all():
+#             if bud == strain.name:
+#                 for flavor in strain.flavors:
+#                     flavor_counts.append(flavor.name)
+#     return {'x': list(dict(Counter(flavor_counts))), 'y': list(Counter(flavor_counts).values())}
+#
+# def top_25_races():
+#     race_counts = []
+#     for bud in top_25_strains:
+#         for strain in strains:
+#             if bud == strain.name:
+#                 race_counts.append(Strain.race)
+#     return {'x': list(Counter(race_counts)), 'y': list(Counter(race_counts).values())}
+# def top_25_effects():
+#     effect_counts = []
+#     for bud in top_25_strains:
+#         for strain in strains:
+#             if bud == strain.name:
+#                 effect_counts.append(Strain.effect)
+#     return {'x': list(Counter(effect_counts)), 'y': list(Counter(effect_counts).values())}
