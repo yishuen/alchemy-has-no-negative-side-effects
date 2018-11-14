@@ -1,5 +1,5 @@
 # Alchemy Has No Negative Side Effects
-in this project, we explore the characteristics of cannabis strains!
+In this project, we explore the characteristics of cannabis strains!
 
 #### Our Two APIs
 * StrainAPI - strains, flavors, effects
@@ -7,6 +7,8 @@ in this project, we explore the characteristics of cannabis strains!
 
 ### Why Did We Choose This?
 Because - why not? Marijuana should no longer be a taboo subject. It's 2018. With 20% of the country having marijuana fully legal and 32 states (plus DC!) having medical marijuana, the need for medical marijuana research is booming!
+
+Since Trump fired Jeff Sessions, recreational weed has a higher chance of becoming legal at a federal level. 
 
 "Given Colorado has 1.7% of the nation's population and based on its tax revenue from marijuana, the entire country could potentially generate $14 billion if it was legalized nationwide!!" - Andrew
 
