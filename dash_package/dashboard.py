@@ -7,7 +7,6 @@ from dash_package import app
 from dash.dependencies import Input, Output, State
 from dash_package.chart_data import *
 
-
 colors = {
     'background': '#003300',
     'text': '#77B300'
@@ -17,7 +16,8 @@ race_piechart_content = list(map(lambda c: {'country': c, 'count_data': race_cou
 flavor_piechart_content = list(map(lambda c: {'country': c, 'count_data': flavor_count_by_country(c)}, countries()))
 effect_piechart_content = list(map(lambda c: {'country': c, 'count_data': effect_count_by_country(c)}, countries()))
 
-# app = dash.Dash(__name__, external_stylesheets=external_stylesheets, server=server, url_base_pathname='/dashboard/')
+effect_map_content = list(map(lambda e: {'effect': e, 'count_data': country_count_by_effect(e)}, effects()))
+flavor_map_content = list(map(lambda f: {'flavor': f, 'count_data': country_count_by_flavor(f)}, flavors()))
 
 app.layout = html.Div(style={'backgroundColor': colors['background']}, children=[
 
@@ -79,10 +79,32 @@ app.layout = html.Div(style={'backgroundColor': colors['background']}, children=
             value='Afghanistan'
         ),
         html.Div(id='output-effects')
-    ])
+    ]),
 
-    #NEW GRAPH HERE!!!!
+    html.H3('So You Wanna Feel...... Where Do You Go?', style={'textAlign': 'center', 'color': colors['text']}),
+
+    html.Div([
+        dcc.Dropdown(
+            id='map-by-effect',
+            options=list(map(lambda e: {'label': e, 'value': e}, effects())),
+            value='Happy'
+        ),
+        html.Div(id='effects-maps')
+    ]),
+
+    html.H3('Flavors. Where Do You Go?', style={'textAlign': 'center', 'color': colors['text']}),
+
+    html.Div([
+        dcc.Dropdown(
+            id='map-by-flavor',
+            options=list(map(lambda f: {'label': f, 'value': f}, flavors())),
+            value='Sweet'
+        ),
+        html.Div(id='flavors-maps')])
+
 ])
+
+
 
 
 @app.callback(Output('output-races', 'children'),
@@ -115,7 +137,6 @@ def display_flavor_content(value):
                 'legend': {'x': 1, 'y': 1}
             }})])
 
-
 @app.callback(Output('output-effects', 'children'),
               [Input('effects-by-country', 'value')])
 def display_effect_content(value):
@@ -127,6 +148,62 @@ def display_effect_content(value):
             'data': data,
             'layout': {
                 'title': str(value) + ' - effects of strains',
+                'margin': {'l': 10,'r': 10,'b': 30,'t': 30},
+                'legend': {'x': 1, 'y': 1}
+            }})])
+
+@app.callback(Output('effects-maps', 'children'),
+              [Input('map-by-effect', 'value')])
+def display_effect_map(value):
+    effect = list(filter(lambda e: e['effect'] == value, effect_map_content))[0]
+    data = [dict(
+        type = 'choropleth',
+        locations = effect['count_data']['x'],
+        z = effect['count_data']['y'],
+        text = effect['count_data']['x'],
+        autocolorscale = True,
+        marker = dict(
+            line = dict (
+                color = 'rgb(180,180,180)',
+                width = 0.5
+            ) ),
+        colorbar = dict(
+            autotick = False,
+            title = 'Strainzzz'))]
+    return html.Div([dcc.Graph(
+        id='effect_map',
+        figure={
+            'data': data,
+            'layout': {
+                'title': 'WHERE TO GET WEED: ' + str(value),
+                'margin': {'l': 10,'r': 10,'b': 30,'t': 30},
+                'legend': {'x': 1, 'y': 1}
+            }})])
+
+@app.callback(Output('flavors-maps', 'children'),
+              [Input('map-by-flavor', 'value')])
+def display_effect_map(value):
+    flavor = list(filter(lambda f: f['flavor'] == value, flavor_map_content))[0]
+    data = [dict(
+        type = 'choropleth',
+        locations = flavor['count_data']['x'],
+        z = flavor['count_data']['y'],
+        text = flavor['count_data']['x'],
+        autocolorscale = True,
+        marker = dict(
+            line = dict (
+                color = 'rgb(180,180,180)',
+                width = 0.5
+            ) ),
+        colorbar = dict(
+            autotick = False,
+            title = 'Strainzzz'))]
+    return html.Div([dcc.Graph(
+        id='flavor_map',
+        figure={
+            'data': data,
+            'layout': {
+                'title': 'WHERE TO GET WEED: ' + str(value),
                 'margin': {'l': 10,'r': 10,'b': 30,'t': 30},
                 'legend': {'x': 1, 'y': 1}
             }})])
